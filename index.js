@@ -3,14 +3,16 @@ var app = express()
 const cors = require ("cors");
 const path = require("path");
 require('dotenv').config()
+const apiRoutes = require("./routes/api.js");
 
 
 //app.use(cors({ origin: "*", credentials: true }))
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-//app.use(express.static('public/dist'))
 
+//app.use(express.static('public/dist'))
+app.use("/api", apiRoutes);
 
 app.get("/", function(req, res){
     return res.json({status: 200})
