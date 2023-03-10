@@ -1,20 +1,12 @@
 const router = require("express").Router();
-const axios = require("axios");
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
-const {db} = require("../util/firebase")
-// const middleware = require('../util/middleware');
 
 
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
-function routes(app) {
-  //router.post("/test2")
-  // router.post("/test", middleware.decodeToken, async (req,res) => {
-  //   return res.json({status: 200})
-    
-  // })
+//function routes(app) {
   router.post("/search", async (req, res) => {
     const data = await handleSearch(req.body.searchQuery);
     res.json({ status: 200, data: data });
@@ -54,8 +46,8 @@ function routes(app) {
     res.json({ status: 200, lyrics: lyrics });
   });
 
-  return router;
-}
+//  return router;
+//}
 
 async function getHTML(URL) {
   var res = await fetch(URL, {
@@ -150,4 +142,4 @@ async function handleTranslate(text, targetLanguage) {
   return translatedLyrics;
 }
 
-module.exports = routes;
+module.exports = router;

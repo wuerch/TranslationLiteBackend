@@ -3,7 +3,10 @@ const { db, admin, verifyToken } = require("../util/firebase");
 const { generateAccessToken, verifyPaypalSubscription, cancelSubscription, getPlans} = require("../util/paypal.js")
 const { createStripeSession, createStripeCustomer, verifyStripeSubscription } = require("../util/stripe.js")
 
-function routes(app) {
+//function routes(app) {
+  router.get("/test", async (req,res) => {
+    return res.json({status: 200, data: "Hi"})
+  })
     router.get("/capture/paypal", async (req,res) => {
         const {subscriptionId, token, plan } = req.query;
         const { uid }  = await verifyToken(token)
@@ -118,7 +121,7 @@ function routes(app) {
           return res.json({status: 200, subscriptionPlan: "premium", subscriptionId: firebaseSubscriptionId, subscriptionStatus: stripeSubscriptionStatus})
         }
       })
-  return router;
-}
+  //return router;
+//}
 
-module.exports = routes;
+module.exports = router;

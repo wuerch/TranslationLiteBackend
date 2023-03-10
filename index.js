@@ -55,8 +55,8 @@ app.get('/onboarding/plans', (req, res) => {
 app.get('/onboarding/appstore', (req, res) => {
 	return res.sendFile(path.join(__dirname, "./out/onboarding", "appstore.html"));
 });
-app.get('*', (req, res) => {
+/*app.get('*', (req, res) => {
 	return res.sendFile(path.join(__dirname, "./out", "404.html"));
-});
+});*/
 
 app.listen(process.env.PORT || 3000, function(){console.log("Server started")});
