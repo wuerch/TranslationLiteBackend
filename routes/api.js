@@ -1,26 +1,41 @@
 const router = require("express").Router();
-const fetch = (...args) =>
-  import("node-fetch").then(({ default: fetch }) => fetch(...args));
+const axios = require("axios");
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
+const {db} = require("../util/firebase")
+// const middleware = require('../util/middleware');
 
 
-router.get("/test", async (req, res) => {  
-  return res.json({msg: "test"})
-})
-router.post("/quicksearch", async (req, res) => {
-  try {
-    if(req.body.target){
-      const target = req.body.target
-      
+const fetch = (...args) =>
+  import("node-fetch").then(({ default: fetch }) => fetch(...args));
+
+function routes(app) {
+  //router.post("/test2")
+  // router.post("/test", middleware.decodeToken, async (req,res) => {
+  //   return res.json({status: 200})
+    
+  // })
+  router.post("/search", async (req, res) => {
+    const data = await handleSearch(req.body.searchQuery);
+    res.json({ status: 200, data: data });
+  });
+
+
+  router.post("/quicksearch", async (req, res) => {
+    try {
+      if(req.body.target){
+        const target = req.body.target
       const data = await handleSearch(req.body.searchQuery);
+      //console.log(JSON.stringify(data, null, 2))
       const artist = data.message.body.track_list[0].track.artist_name;
       const song = data.message.body.track_list[0].track.track_name;
+
       const scrapeURL = data.message.body.track_list[0].track.track_share_url.split('?')[0] //https://www.musixmatch.com/lyrics/Apache-207/Roller?
-      
+      //console.log(scrapeURL);
       var lyrics = await getLyrics(scrapeURL);
       const translatedLyrics = await handleTranslate(lyrics, target);
-      
+      //console.log(translatedLyrics)
+
       return res.json({
         status: 200,
         artist: artist,
@@ -28,10 +43,19 @@ router.post("/quicksearch", async (req, res) => {
         lyrics: lyrics,
         translatedLyrics: translatedLyrics,
       });
-    }
-  } catch (err) {}
-});
+      }
+    } catch (err) {}
+  });
 
+  router.post("/selected", async (req, res) => {
+    const scrapeURL = req.body.selectedSong.result.url;
+    const lyrics = await getLyrics(scrapeURL);
+
+    res.json({ status: 200, lyrics: lyrics });
+  });
+
+  return router;
+}
 
 async function getHTML(URL) {
   var res = await fetch(URL, {
@@ -41,7 +65,6 @@ async function getHTML(URL) {
 }
 async function handleSearch(searchQuery){
   var returnedData;
-
   await fetch(`https://api.musixmatch.com/ws/1.1/track.search?apikey=4429a9866ca299e3461a53362d9bc840&page_size=1&q_track_artist=${searchQuery}&s_track_rating=desc&page_size=10`, {
     method: "GET",
   })
@@ -61,7 +84,6 @@ async function getLyrics(URL){
   );
   const dom = new JSDOM(html);
   const document = dom.window.document;
-
   const parentDiv = document.querySelector(".mxm-lyrics span");
  
   // Make sure the parent div exists
@@ -120,12 +142,12 @@ async function handleTranslate(text, targetLanguage) {
   })
     .then((res) => res.json())
     .then((res) => {
-      console.log(res.data.translations[0])
+      //console.log(res.data.translations[0])
       translatedLyrics = res.data.translations[0].translatedText;
     })
     .catch((err) => console.error(err));
 
   return translatedLyrics;
 }
-    
-module.exports = router
+
+module.exports = routes;
